@@ -43,7 +43,19 @@ font_main = font.Font(None, 36)
 # --- ЗОБРАЖЕННЯ ----
 BG_IMG = image.load("images/bg.jpg")
 BG_IMG = transform.scale(BG_IMG, (WIDTH, HEIGHT))
+
+BALL_IMG = image.load("images/ball.png")
+BALL_IMG = transform.scale(BALL_IMG, (20,20))
+
+PADDLE_IMG = transform.scale(image.load("images/silk-texture.webp"), (20,100))
+
 # --- ЗВУКИ ---
+mixer.music.load("sounds/background.ogg")
+mixer.music.set_volume(0.05)
+mixer.music.play(-1)
+
+VICTORY_SOUND = mixer.Sound("sounds/victory.wav")
+HIT_SOUND = mixer.Sound("sounds/hit.wav")
 
 # --- ГРА ---
 game_over = False
@@ -69,6 +81,8 @@ while True:
         if you_winner is None:  # Встановлюємо тільки один раз
             if game_state["winner"] == my_id:
                 you_winner = True
+                VICTORY_SOUND.play()
+                mixer.music.set_volume(0.1)
             else:
                 you_winner = False
 
@@ -89,13 +103,10 @@ while True:
         continue  # Блокує гру після перемоги
 
     if game_state:
-        # screen.fill((30, 30, 255))
-        BG_IMG = image.load("images/bg.jpg")
-        BG_IMG = transform.scale(BG_IMG, (WIDTH, HEIGHT))
         screen.blit(BG_IMG, (0, 0))
-        draw.rect(screen, (0, 255, 0), (20, game_state['paddles']['0'], 20, 100))
-        draw.rect(screen, (255, 0, 255), (WIDTH - 40, game_state['paddles']['1'], 20, 100))
-        draw.circle(screen, (255, 255, 255), (game_state['ball']['x'], game_state['ball']['y']), 10)
+        screen.blit(PADDLE_IMG, (20, game_state['paddles']['0']))
+        screen.blit(PADDLE_IMG, (WIDTH - 40, game_state['paddles']['1'], 20, 100))
+        screen.blit(BALL_IMG, (game_state['ball']['x'] - 10, game_state['ball']['y'] - 10))  # -10 для центрування
         score_text = font_main.render(f"{game_state['scores'][0]} : {game_state['scores'][1]}", True, (255, 255, 255))
         screen.blit(score_text, (WIDTH // 2 -25, 20))
 
@@ -104,7 +115,7 @@ while True:
                 # звук відбиття м'ячика від стін
                 pass
             if game_state['sound_event'] == 'platform_hit':
-                # звук відбиття м'ячика від платформи
+                HIT_SOUND.play()
                 pass
 
     else:
